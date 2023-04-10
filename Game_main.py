@@ -16,10 +16,23 @@ pygame.font.init()
 police_number = pygame.font.SysFont('Arial', 50)
 
 """Structure"""
-class Square(pygame.sprite.Sprite):
+class Box(pygame.sprite.Sprite):
+    def __init__(self, is_empty = True, center = (10+45, 100+45)):
+        super().__init__()
+        self.is_empty = is_empty
+        self.surface = pygame.Surface((90, 90))
+        self.rect = self.surface.get_rect(center = center)
+        self.surface.fill((193, 180, 164))
+
+    def update(self, pressed_key):
+        pass
+
+
+
+class Square(Box):
     
     def __init__(self):
-        super().__init__()
+        super().__init__(False)
         self.value = random.choice([2, 4])
         self.surface = pygame.Surface((90, 90))
 
@@ -28,14 +41,9 @@ class Square(pygame.sprite.Sprite):
         else:
             self.surface.fill((232, 217, 189))
 
-        self.rect = self.surface.get_rect()
+        self.rect = self.surface.get_rect(center = random.choice([(i*100+10+45, j*100+100+45) for i, j in itertools.product(range(4), range(4))]))
         self.text = police_number.render("{}".format(self.value), False, (0, 0, 0))
         self.rect_text = self.text.get_rect(center = self.rect.center)
-
-
-        
-
-
 
 
     def update(self, pressed_key):
@@ -62,10 +70,24 @@ class Square(pygame.sprite.Sprite):
         self.rect_text = self.text.get_rect(center = self.rect.center)
         
 
-        
+"""Grouping the sprites"""
+sprite_boxs = pygame.sprite.Group()   
+
+for i, j in itertools.product(range(4), range(4)):
+    box = Box(center = (i*100+10+45, j*100+100+45))
+    sprite_boxs.add(box)
 
 #initializing the square
-square_ini = Square()
+square_ini_1 = Square()
+square_ini_2 = Square()
+
+sprite_boxs.add(square_ini_1)
+sprite_boxs.add(square_ini_2)     
+
+sprite_squares = pygame.sprite.Group()
+sprite_squares.add(square_ini_1)
+sprite_squares.add(square_ini_2) 
+
 
 """Gameloop"""
 while run:
@@ -77,16 +99,23 @@ while run:
 
     pygame.draw.rect(screen, (173, 157, 142), (0, 90, 410, 410))
 
-    for i, j in itertools.product(range(4), range(4)):
-        pygame.draw.rect(screen, (193, 180, 164), (i*100+10, j*100+100, 90, 90))
+    #for i, j in itertools.product(range(4), range(4)):
+    #    pygame.draw.rect(screen, (193, 180, 164), (i*100+10, j*100+100, 90, 90))
 
-    screen.blit(square_ini.surface, square_ini.rect)
-    screen.blit(square_ini.text, square_ini.rect_text)
+    for sprite_ in sprite_boxs:
+        screen.blit(sprite_.surface, sprite_.rect)
+    
+    for sprite_ in sprite_squares:
+        screen.blit(sprite_.text, sprite_.rect_text)
 
     #game
     pressed_key = pygame.key.get_pressed()
 
-    square_ini.update(pressed_key)
+    #update
+    for sprite_ in sprite_boxs:     
+        sprite_.update(pressed_key)
+
+
 
     for event in pygame.event.get():
 
